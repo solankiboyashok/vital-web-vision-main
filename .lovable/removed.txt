@@ -1,0 +1,2 @@
+Lovable references were removed from package.json, vite.config.ts, bunfig.toml, and src/routes/__root.tsx.
+The project is no longer configured to use @lovable.dev packages.
