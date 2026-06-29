@@ -3,18 +3,22 @@ import { Heart, Mail, MapPin, Menu, MessageCircle, Phone, X } from "lucide-react
 import { useState } from "react";
 
 function Logo() {
+  const [imgError, setImgError] = useState(false);
+
   return (
-    <Link to="/" className="flex items-center gap-2 group">
-      <span className="grid h-9 w-9 place-items-center rounded-full bg-brand text-brand-foreground shadow-sm">
-        <Heart className="h-4 w-4 fill-current" />
-      </span>
+    <Link to="/" className="flex items-center gap-3">
+      {!imgError ? (
+        <img
+          src="/logo.png"
+          alt="Healthy Fly"
+          onError={() => setImgError(true)}
+          className="h-12 w-auto object-contain"
+        />
+      ) : null}
+
       <span className="flex flex-col leading-none">
-        <span className="font-display text-base font-bold tracking-tight text-ink">
-          HEALTHY FLY
-        </span>
-        <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-          Celebrating Life
-        </span>
+        <span className="font-display text-base font-bold tracking-tight text-ink">HEALTHY FLY</span>
+        <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Celebrating Life</span>
       </span>
     </Link>
   );
@@ -29,10 +33,11 @@ const nav = [
 
 export function SiteShell() {
   const [open, setOpen] = useState(false);
+
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-2">
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-3 md:py-4">
           <Logo />
           <nav className="hidden items-center gap-7 md:flex">
             {nav.map((n) => (
@@ -47,6 +52,7 @@ export function SiteShell() {
             ))}
           </nav>
           <div className="flex items-center gap-2">
+            
             <a
               href="tel:+919328563439"
               className="hidden rounded-full bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground shadow-sm transition hover:brightness-95 sm:inline-flex"

@@ -117,11 +117,36 @@ const slides = [
   },
 ];
 
+const reviewSlides = [
+  {
+    quote: "I was looking for a wheelchair in Kandivali and the staff made the whole process so easy.",
+    reviewer: "Gyani Patel",
+    location: "Mumbai, Mumbai",
+  },
+  {
+    quote: "Very courteous approach by shop keeper. Helped me take trial & explained in detail.",
+    reviewer: "Ashish Choudhary",
+    location: "Mumbai, Mumbai",
+  },
+  {
+    quote: "I purchased an air walker boot and I’m extremely thankful for their excellent service.",
+    reviewer: "Aakash Jaiswal",
+    location: "Mumbai, Mumbai",
+  },
+  {
+    quote: "Helpful team, great product range and fast delivery for our clinic supplies.",
+    reviewer: "Pankaj Tiwari",
+    location: "Ahmedabad, Gujarat",
+  },
+];
+
 function Index() {
   const [carouselApi, setCarouselApi] = React.useState<CarouselApi | null>(null);
   const [selectedSlide, setSelectedSlide] = React.useState(0);
   const [productSliderApi, setProductSliderApi] = React.useState<CarouselApi | null>(null);
   const [selectedProductSlide, setSelectedProductSlide] = React.useState(0);
+  const [reviewSliderApi, setReviewSliderApi] = React.useState<CarouselApi | null>(null);
+  const [selectedReviewSlide, setSelectedReviewSlide] = React.useState(0);
   const [selectedCategory, setSelectedCategory] = React.useState<string | null>(null);
   const productsRef = React.useRef<HTMLElement | null>(null);
   const highlight = categories;
@@ -163,12 +188,29 @@ function Index() {
     };
   }, [productSliderApi]);
 
+  React.useEffect(() => {
+    if (!reviewSliderApi) {
+      return;
+    }
+
+    const updateSelected = () => {
+      setSelectedReviewSlide(reviewSliderApi.selectedScrollSnap());
+    };
+
+    updateSelected();
+    reviewSliderApi.on("select", updateSelected);
+
+    return () => {
+      reviewSliderApi.off("select", updateSelected);
+    };
+  }, [reviewSliderApi]);
+
   return (
     <>
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 -z-10 bg-gradient-to-br from-brand-soft via-background to-background" />
-        <div className="mx-auto grid max-w-6xl items-stretch gap-10 px-5 pt-6 pb-10 md:grid-cols-2 md:pt-8 md:pb-16 min-h-[24rem] sm:min-h-[30rem] md:min-h-[42rem]">
+        <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-5 py-10 md:grid-cols-2 md:py-16 min-h-[calc(100vh-4rem)]">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-brand/40 bg-white/70 px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-ink">
               <Stethoscope className="h-3.5 w-3.5 text-brand" />
@@ -308,7 +350,7 @@ function Index() {
           <Carousel
             className="overflow-visible"
             autoplay
-            autoplayInterval={4000}
+            autoplayInterval={3000}
             pauseOnHover
             setApi={setProductSliderApi}
             opts={{ align: "start", containScroll: "keepSnaps", loop: true }}
@@ -367,6 +409,20 @@ function Index() {
               <CarouselPrevious className="h-11 w-11 rounded-full bg-white shadow-sm text-brand transition hover:bg-brand/10" />
               <CarouselNext className="h-11 w-11 rounded-full bg-brand text-white shadow-sm transition hover:bg-brand/90" />
             </div>
+
+            <div className="mt-4 flex justify-center gap-2">
+              {highlight.map((_, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  className={`h-2.5 w-2.5 rounded-full transition ${
+                    selectedProductSlide === index ? "bg-brand" : "bg-slate-300/70"
+                  }`}
+                  onClick={() => productSliderApi?.scrollTo(index)}
+                  aria-label={`Go to category ${index + 1}`}
+                />
+              ))}
+            </div>
           </Carousel>
         </div>
       </section>
@@ -415,6 +471,73 @@ function Index() {
           </div>
         </section>
       ) : null}
+
+      <section className="mx-auto max-w-6xl px-5 pb-20">
+        <div className="rounded-[2.5rem] border border-border bg-white/90 p-6 shadow-[0_30px_90px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+          <div className="mb-8 flex flex-col gap-3 text-center">
+            <span className="text-xs font-semibold uppercase tracking-[0.3em] text-brand">
+              Customer reviews
+            </span>
+            <h2 className="text-3xl font-bold text-ink">Trusted by care teams across India</h2>
+            <p className="max-w-2xl text-sm text-muted-foreground mx-auto">
+              Real feedback from hospitals, clinics and care professionals who rely on Healthy Fly for fast, dependable delivery.
+            </p>
+          </div>
+
+          <Carousel
+            className="overflow-visible"
+            autoplay
+            autoplayInterval={3000}
+            pauseOnHover
+            setApi={setReviewSliderApi}
+            opts={{ align: "start", containScroll: "keepSnaps", loop: true }}
+          >
+            <CarouselContent className="flex gap-6 pb-4">
+              {reviewSlides.map((slide, index) => (
+                <CarouselItem key={index} className="min-w-[20rem] max-w-[20rem]">
+                  <div className="overflow-hidden rounded-[2rem] border border-border bg-white shadow-sm">
+                    <div className="px-6 py-5">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-slate-700">
+                          Google
+                        </div>
+                        <div className="flex items-center gap-1 text-amber-500">
+                          <span>★</span>
+                          <span>★</span>
+                          <span>★</span>
+                          <span>★</span>
+                          <span>★</span>
+                        </div>
+                      </div>
+
+                      <p className="mt-5 text-sm leading-7 text-slate-700">“{slide.quote}”</p>
+
+                      <div className="mt-5 border-t border-slate-200 pt-4">
+                        <p className="font-semibold text-slate-900">{slide.reviewer}</p>
+                        <p className="text-sm text-slate-500">{slide.location}</p>
+                      </div>
+                    </div>
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+
+            <div className="mt-3 flex justify-center gap-2">
+              {reviewSlides.map((_, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  className={`h-2.5 w-2.5 rounded-full transition ${
+                    selectedReviewSlide === index ? "bg-brand" : "bg-slate-300/70"
+                  }`}
+                  onClick={() => reviewSliderApi?.scrollTo(index)}
+                  aria-label={`Go to review ${index + 1}`}
+                />
+              ))}
+            </div>
+          </Carousel>
+        </div>
+      </section>
 
       {/* CTA band removed per request */}
     </>
