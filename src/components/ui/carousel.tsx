@@ -15,6 +15,9 @@ type CarouselProps = {
   plugins?: CarouselPlugin;
   orientation?: "horizontal" | "vertical";
   setApi?: (api: CarouselApi) => void;
+  autoplay?: boolean;
+  autoplayInterval?: number;
+  pauseOnHover?: boolean;
 };
 
 type CarouselContextProps = {
@@ -41,16 +44,32 @@ function useCarousel() {
 const Carousel = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & CarouselProps
->(({ orientation = "horizontal", opts, setApi, plugins, className, children, ...props }, ref) => {
-  const [carouselRef, api] = useEmblaCarousel(
+>(
+  (
     {
-      ...opts,
-      axis: orientation === "horizontal" ? "x" : "y",
+      orientation = "horizontal",
+      opts,
+      setApi,
+      plugins,
+      autoplay = false,
+      autoplayInterval = 5000,
+      pauseOnHover = true,
+      className,
+      children,
+      ...props
     },
-    plugins,
-  );
-  const [canScrollPrev, setCanScrollPrev] = React.useState(false);
-  const [canScrollNext, setCanScrollNext] = React.useState(false);
+    ref,
+  ) => {
+    const [carouselRef, api] = useEmblaCarousel(
+      {
+        ...opts,
+        axis: orientation === "horizontal" ? "x" : "y",
+      },
+      plugins,
+    );
+    const [canScrollPrev, setCanScrollPrev] = React.useState(false);
+    const [canScrollNext, setCanScrollNext] = React.useState(false);
+    const [isPaused, setIsPaused] = React.useState(false);
 
   const onSelect = React.useCallback((api: CarouselApi) => {
     if (!api) {
@@ -101,8 +120,31 @@ const Carousel = React.forwardRef<
 
     return () => {
       api?.off("select", onSelect);
+      api?.off("reInit", onSelect);
     };
   }, [api, onSelect]);
+
+  React.useEffect(() => {
+    if (!api || !autoplay || isPaused) {
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      if (!api) {
+        return;
+      }
+
+      if (api.canScrollNext()) {
+        api.scrollNext();
+      } else {
+        api.scrollTo(0);
+      }
+    }, autoplayInterval);
+
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [api, autoplay, autoplayInterval, isPaused]);
 
   return (
     <CarouselContext.Provider
@@ -115,11 +157,24 @@ const Carousel = React.forwardRef<
         scrollNext,
         canScrollPrev,
         canScrollNext,
+        autoplay,
+        autoplayInterval,
+        pauseOnHover,
       }}
     >
       <div
         ref={ref}
         onKeyDownCapture={handleKeyDown}
+        onMouseEnter={() => {
+          if (pauseOnHover) {
+            setIsPaused(true);
+          }
+        }}
+        onMouseLeave={() => {
+          if (pauseOnHover) {
+            setIsPaused(false);
+          }
+        }}
         className={cn("relative", className)}
         role="region"
         aria-roledescription="carousel"
